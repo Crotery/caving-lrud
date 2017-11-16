@@ -11,7 +11,7 @@ function start() {
         var a = /\s*(\w+)\s+([\w-]+)\s+([\d.-]+)\s+([\d.-]+)\s+([\d.-]+)/.exec(line);
 
         if (!a || a.length <= 1) {
-            if (line[0] === "#" || ["extend right", "extend left", "extend vertical"].indexOf(line) === -1)
+            if (line[0] === "#")
                 res.push(line);
 
             continue;
@@ -27,13 +27,16 @@ function start() {
 
         if (zamer.to === '-') {
             lruds.push(zamer);
-        } else if (piket.from !== zamer.from || piket.to !== zamer.to) {
-            if (piket.from)
+        } else if (piket.from !== zamer.from || piket.to !== zamer.to || i === lines.length - 1) {
+            if (piket.from) {
                 res.push(guess(piket, lruds));
+                piket = null;
+            }
             lruds.forEach(function (z) {
 
                 res.push(format_piket(z) + "\t0\t0\t0\t0");
             });
+            piket = {};
             piket.from = zamer.from;
             piket.to = zamer.to;
             piket.dist = zamer.dist;
@@ -43,8 +46,16 @@ function start() {
         }
 
     }
-    if (lruds.length === 0)
+    if (lruds.length === 0) {
         res.push(format_piket(piket) + "\t0\t0\t0\t0");
+    }
+    else if (piket) {
+        res.push(guess(piket, lruds));
+        lruds.forEach(function (z) {
+
+            res.push(format_piket(z) + "\t0\t0\t0\t0");
+        });
+    }
     output.innerText = res.join("\n");
 }
 
